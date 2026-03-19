@@ -1,0 +1,46 @@
+name: syncflow
+services:
+  postgres:
+    image: postgres:15
+    container_name: syncflow_postgres
+    environment:
+      POSTGRES_USER: syncflow_user
+      POSTGRES_PASSWORD: syncflow_password
+      POSTGRES_DB: syncflow_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - syncflow_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: syncflow_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - syncflow_network
+
+  api:
+    build: .
+    container_name: syncflow_api
+    environment:
+      DATABASE_URL: postgresql://syncflow_user:syncflow_password@postgres:5432/syncflow_db
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - syncflow_network
+
+volumes:
+  postgres_data:
+
+networks:
+  syncflow_network:
+    driver: bridge
