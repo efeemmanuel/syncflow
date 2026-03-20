@@ -5,16 +5,25 @@ class Base(DeclarativeBase):
     pass
 
 
-# import all models here so Alembic can discover them
 from app.models.company import Company
 from app.models.user import User
 from app.models.team import Team
+from app.models.team_member import TeamMember
 from app.models.project import Project
+from app.models.project_team import ProjectTeam
+from app.models.project_link import ProjectLink
 from app.models.task import Task
+from app.models.task_submission import TaskSubmission
+from app.models.task_attachment import TaskAttachment
+from app.models.task_comment import TaskComment
+from app.models.task_integration import TaskIntegration
+from app.models.channel import Channel
+from app.models.channel_member import ChannelMember
 from app.models.message import Message
+from app.models.thread import Thread
 from app.models.invitation import Invitation
-
-
+from app.models.notification import Notification
+from app.models.audit_log import AuditLog
 
 
 
