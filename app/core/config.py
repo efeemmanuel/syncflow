@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     redis_url: str
 
     # cors
-    allowed_origins: List[str] = ["http://localhost:3000"]
+    allowed_origins: str = "http://localhost:3000,http://localhost:8000"
 
     class Config:
         env_file = ".env"
