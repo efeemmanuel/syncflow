@@ -21,6 +21,35 @@ from app.models.invitation import Invitation
 
 
 ''' 
+Base is like a school register.
+Every student (model) that signs the register (inherits from Base) gets recorded.
+The teacher (Alembic/SQLAlchemy) checks the register to know who exists.
+
+
+
+
+You are telling SQLAlchemy three things:
+
+**1 — This class is a database table.**
+
+Without inheriting from `Base`, `Company` is just a regular Python class. SQLAlchemy has no idea it exists. By inheriting from `Base`, SQLAlchemy registers it internally and says "this is a table I need to manage."
+
+**2 — The metadata connection.**
+
+`Base` carries a `metadata` object internally. Metadata is a collection of all your table definitions. Every class that inherits from `Base` gets added to that metadata automatically.
+```
+Base.metadata
+    ├── companies table
+    ├── users table
+    ├── teams table
+    └── projects table
+
+
+
+
+
+
+
 
 This section is specifically for Alembic.
 
