@@ -48,25 +48,53 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 # verify the jwt token
-def verify_token(token: str):
+# def verify_token(token: str):
+#     credentials_exception = HTTPException(
+#         status_code=status.HTTP_401_UNAUTHORIZED,
+#         detail="Could not validate credentials",
+#         headers={"WWW-Authenticate": "Bearer"},
+#     )
+#     try:
+#         # decode the token with secret key
+#         payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+#         # get user id
+#         user_id: int = payload.get("user_id")
+#         if user_id is None:
+#             raise credentials_exception
+#         return user_id
+#     except InvalidTokenError:
+#         raise credentials_exception   
+
+async def verify_token(token: str):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    # check blacklist
+    blacklisted = await redis_client.get(f"blacklist:{token}")
+    if blacklisted:
+        raise credentials_exception
     try:
-        # decode the token with secret key
         payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
-        # get user id
         user_id: int = payload.get("user_id")
+        company_id: int = payload.get("company_id")
+        role: str = payload.get("role")
         if user_id is None:
             raise credentials_exception
-        return user_id
+        return {"user_id": user_id, "company_id": company_id, "role": role}
     except InvalidTokenError:
-        raise credentials_exception   
+        raise credentials_exception
 
 
 
+
+
+def create_refresh_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, settings.secret_key, settings.algorithm)
 
 
 

@@ -35,3 +35,15 @@ async def send_admin_invite_email(email: str, token: str, company_name: str):
 
 
 
+
+async def send_invite_email(email: str, token: str, role: str):
+    message = MessageSchema(
+        subject=f"You have been invited as {role}",
+        recipients=[email],
+        body=f"Click the link to set up your account: http://localhost:8000/auth/accept-invite?token={token}",
+        subtype="plain"
+    )
+    fm = FastMail(conf)
+    await fm.send_message(message)
+
+

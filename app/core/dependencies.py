@@ -24,7 +24,7 @@ async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[AsyncSession, Depends(get_db_session)]
 ):
-    token_data = verify_token(token)
+    token_data = await verify_token(token)
     result = await db.execute(select(User).where(User.id == token_data["user_id"]))
     user = result.scalar_one_or_none()
     if not user:

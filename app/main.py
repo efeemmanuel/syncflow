@@ -4,7 +4,11 @@ from app.routes.auth import router as auth_router
 
 
 
-app = FastAPI()
+app = FastAPI(
+    title="Syncflow",
+    version="1.0.0",
+    swagger_ui_oauth2_redirect_url="/oauth2-redirect",
+)
 
 
 app.include_router(auth_router)
