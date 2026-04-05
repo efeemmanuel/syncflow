@@ -27,6 +27,7 @@ class User(Base):
     joined_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     invite_accepted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     invite_token_used: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    team_id: Mapped[Optional[int]] = mapped_column(ForeignKey("teams.id"), nullable=True)
 
     # company relationship added — you need this to navigate back to the company from a user.
     company: Mapped["Company"] = relationship(back_populates="members")
