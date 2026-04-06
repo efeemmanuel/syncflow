@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from app.routes.auth import router as auth_router
 from app.routes.team import router as teams_router
 from app.routes.project import router as projects_router
+from app.routes.task import router as tasks_router
 
 
 
@@ -17,6 +18,8 @@ app.include_router(auth_router)
 
 app.include_router(teams_router)
 app.include_router(projects_router)
+app.include_router(tasks_router)
+
 
 @app.get("/")
 def root():

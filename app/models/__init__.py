@@ -7,3 +7,5 @@ from app.models.channels import Channel
 from app.models.team_members import TeamMembers
 from app.models.project_member import ProjectMembers
 from app.models.task_assign import TaskAssignees
+from app.models.comment import Comment
+from app.models.attachment import Attachment
