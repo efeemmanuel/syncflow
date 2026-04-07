@@ -5,9 +5,11 @@ import pytest
 import asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.pool import NullPool
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy import text
+from unittest.mock import AsyncMock, patch
 from app.main import app
-from app.core.database import Base, sessionmanager
+from app.core.database import Base
 from app.models import *
 
 
@@ -28,8 +30,19 @@ async def setup_db():
         await conn.run_sync(Base.metadata.create_all)
     yield
     async with engine.begin() as conn:
+        await conn.execute(text("SET session_replication_role = replica"))
         await conn.run_sync(Base.metadata.drop_all)
+        await conn.execute(text("SET session_replication_role = DEFAULT"))
     await engine.dispose()
+
+
+@pytest.fixture(autouse=True)
+def mock_external():
+    with patch("app.utils.email.send_otp_email", new_callable=AsyncMock), \
+         patch("app.utils.email.send_admin_invite_email", new_callable=AsyncMock), \
+         patch("app.utils.email.send_invite_email", new_callable=AsyncMock), \
+         patch("app.utils.otp.verify_otp", new_callable=AsyncMock, return_value=True):
+        yield
 
 
 @pytest.fixture
