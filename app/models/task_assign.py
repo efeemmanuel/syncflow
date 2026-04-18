@@ -12,7 +12,7 @@ from datetime import datetime
 class TaskAssignees(Base):
     __tablename__ = "task_assignees"
 
-    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id"), primary_key=True)
+    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
 
     task: Mapped["Task"] = relationship(back_populates="assignees")

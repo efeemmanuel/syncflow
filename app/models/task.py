@@ -19,7 +19,7 @@ class Task(Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False)
-    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"), nullable=False)
+    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
     created_by: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     status: Mapped[str] = mapped_column(Enum("todo", "in_progress", "completed", "blocked", name="task_status"), default="todo", nullable=False)
     priority: Mapped[str] = mapped_column(Enum("low", "medium", "high", name="task_priority"), default="medium", nullable=False)

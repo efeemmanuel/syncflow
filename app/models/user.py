@@ -20,7 +20,7 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(255), nullable=True, unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=True)
     role: Mapped[str] = mapped_column(Enum("admin", "team_lead", "member", name="user_role"), nullable=False)
-    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"), nullable=False)
+    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     invited_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)

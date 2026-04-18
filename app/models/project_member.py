@@ -13,7 +13,7 @@ from datetime import datetime
 class ProjectMembers(Base):
     __tablename__ = "project_members"
 
-    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), primary_key=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
     role_in_project: Mapped[str] = mapped_column(Enum("lead", "member", name="project_role"), default="member", nullable=False)
 

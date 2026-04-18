@@ -9,7 +9,7 @@ class ChannelMessage(Base):
     __tablename__ = "channel_messages"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    channel_id: Mapped[int] = mapped_column(ForeignKey("channels.id"), nullable=False)
+    channel_id: Mapped[int] = mapped_column(ForeignKey("channels.id", ondelete="CASCADE"), nullable=False)
     sender_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     reply_to_id: Mapped[Optional[int]] = mapped_column(ForeignKey("channel_messages.id"), nullable=True)

@@ -13,7 +13,7 @@ from datetime import datetime
 class TeamMembers(Base):
     __tablename__ = "team_members"
 
-    team_id: Mapped[int] = mapped_column(ForeignKey("teams.id"), primary_key=True)
+    team_id: Mapped[int] = mapped_column(ForeignKey("teams.id", ondelete="CASCADE"), primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
 
     team: Mapped["Team"] = relationship(back_populates="members")
