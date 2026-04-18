@@ -1,12 +1,14 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Optional
 
 class Settings(BaseSettings):
     database_url: str
     postgres_user: str
     postgres_password: str
     postgres_db: str
-    redis_host: str
-    redis_port: int
+    redis_host: Optional[str] = None
+    redis_port: Optional[int] = None
+    redis_url: Optional[str] = None
     secret_key: str
     algorithm: str
     access_token_expire_minutes: int
