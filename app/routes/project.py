@@ -9,6 +9,8 @@ from app.services.project import (
     update_project, delete_project
 )
 
+from app.schemas.project import ProjectRequest, ProjectUpdate, ProjectResponse
+
 router = APIRouter(prefix="/projects", tags=["projects"])
 
 
@@ -47,10 +49,11 @@ async def get_single_project_route(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
+
 @router.put("/{project_id}", response_model=ProjectResponse)
 async def update_project_route(
     project_id: int,
-    data: ProjectRequest,
+    data: ProjectUpdate,  # change from ProjectRequest to ProjectUpdate
     db: Annotated[AsyncSession, Depends(get_db_session)],
     current_user: Annotated[User, Depends(require_admin_or_lead)]
 ):

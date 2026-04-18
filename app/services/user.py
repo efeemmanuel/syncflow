@@ -3,10 +3,23 @@ from sqlalchemy import select
 from app.models.user import User
 from app.schemas.user import UserUpdate
 
+from app.models.company import Company
 
-async def get_me(current_user: User):
-    return current_user
-
+async def get_me(current_user: User, db: AsyncSession):
+    company = await db.get(Company, current_user.company_id)
+    # return as dict so company_name is included
+    return {
+        "id": current_user.id,
+        "full_name": current_user.full_name,
+        "email": current_user.email,
+        "username": current_user.username,
+        "role": current_user.role,
+        "company_id": current_user.company_id,
+        "company_name": company.name if company else None,
+        "team_id": current_user.team_id,
+        "is_active": current_user.is_active,
+        "created_at": current_user.created_at,
+    }
 
 async def update_me(db: AsyncSession, data: UserUpdate, current_user: User):
     # check username not already taken

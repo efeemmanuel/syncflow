@@ -1,13 +1,8 @@
-from typing import List
-from typing import Optional
-from sqlalchemy import ForeignKey
-from sqlalchemy import String, Enum,Boolean, DateTime, Text
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import relationship
+from typing import List, Optional
+from sqlalchemy import ForeignKey, String, Boolean, DateTime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 from datetime import datetime
-
 
 
 class Channel(Base):
@@ -22,3 +17,4 @@ class Channel(Base):
 
     company: Mapped["Company"] = relationship(back_populates="channels")
     project: Mapped[Optional["Project"]] = relationship(back_populates="channels")
+    messages: Mapped[List["ChannelMessage"]] = relationship(back_populates="channel", cascade="all, delete-orphan")

@@ -18,5 +18,6 @@ class UserResponse(BaseModel):
     team_id: Optional[int] = None
     is_active: bool
     created_at: datetime
+    company_name: Optional[str] = None   # ← ADD THIS
 
     model_config = {"from_attributes": True}

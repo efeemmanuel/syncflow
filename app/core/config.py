@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     secret_key: str
     algorithm: str
     access_token_expire_minutes: int
-    refresh_token_expire: int
+    refresh_token_expire_days: int
     mail_username: str
     mail_password: str
     mail_from: str

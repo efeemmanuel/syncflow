@@ -5,6 +5,10 @@ from app.models.project import Project
 from app.models.user import User
 from app.models.task_assign import TaskAssignees
 from app.schemas.task import TaskCreate, TaskUpdate
+from app.models.task_assign import TaskAssignees
+from app.models.comment import Comment
+from app.models.attachment import Attachment
+from sqlalchemy import delete
 
 
 async def create_task(db: AsyncSession, data: TaskCreate, current_user: User):
@@ -94,7 +98,25 @@ async def update_task(db: AsyncSession, task_id: int, data: TaskUpdate, current_
     if not task:
         raise ValueError("Task not found")
 
-    # team lead can only update tasks in their team projects
+    # members can only update status of their assigned tasks
+    if current_user.role == "member":
+        
+        result = await db.execute(
+            select(TaskAssignees).where(
+                TaskAssignees.task_id == task_id,
+                TaskAssignees.user_id == current_user.id
+            )
+        )
+        if not result.scalar_one_or_none():
+            raise ValueError("You are not assigned to this task")
+        # member can only update status
+        if data.status:
+            task.status = data.status
+        await db.commit()
+        await db.refresh(task)
+        return task
+
+    # admin/team lead can update everything
     if current_user.role == "team_lead":
         result = await db.execute(
             select(Project).where(Project.id == task.project_id, Project.team_id == current_user.team_id)
@@ -118,6 +140,11 @@ async def update_task(db: AsyncSession, task_id: int, data: TaskUpdate, current_
     return task
 
 
+
+
+
+
+
 async def delete_task(db: AsyncSession, task_id: int, current_user: User):
     result = await db.execute(
         select(Task).where(Task.id == task_id, Task.company_id == current_user.company_id)
@@ -126,35 +153,34 @@ async def delete_task(db: AsyncSession, task_id: int, current_user: User):
     if not task:
         raise ValueError("Task not found")
 
-    # team lead can only delete tasks in their team projects
     if current_user.role == "team_lead":
         result = await db.execute(
             select(Project).where(Project.id == task.project_id, Project.team_id == current_user.team_id)
         )
         if not result.scalar_one_or_none():
             raise ValueError("Access denied")
+
+    # delete related records first
+    await db.execute(delete(TaskAssignees).where(TaskAssignees.task_id == task_id))
+    await db.execute(delete(Comment).where(Comment.task_id == task_id))
+    await db.execute(delete(Attachment).where(Attachment.task_id == task_id))
 
     await db.delete(task)
     await db.commit()
     return {"message": "Task deleted successfully"}
 
 
+
+
+
+
 async def assign_task(db: AsyncSession, task_id: int, user_id: int, current_user: User):
-    # check task exists in company
     result = await db.execute(
         select(Task).where(Task.id == task_id, Task.company_id == current_user.company_id)
     )
     task = result.scalar_one_or_none()
     if not task:
         raise ValueError("Task not found")
-
-    # team lead can only assign tasks in their team projects
-    if current_user.role == "team_lead":
-        result = await db.execute(
-            select(Project).where(Project.id == task.project_id, Project.team_id == current_user.team_id)
-        )
-        if not result.scalar_one_or_none():
-            raise ValueError("Access denied")
 
     # check user exists in company
     result = await db.execute(
@@ -164,7 +190,19 @@ async def assign_task(db: AsyncSession, task_id: int, user_id: int, current_user
     if not user:
         raise ValueError("User not found in this company")
 
-    # check user not already assigned
+    # auto add to project members if not already there
+    from app.models.project_member import ProjectMembers
+    result = await db.execute(
+        select(ProjectMembers).where(
+            ProjectMembers.project_id == task.project_id,
+            ProjectMembers.user_id == user_id
+        )
+    )
+    if not result.scalar_one_or_none():
+        project_member = ProjectMembers(project_id=task.project_id, user_id=user_id)
+        db.add(project_member)
+
+
     result = await db.execute(
         select(TaskAssignees).where(
             TaskAssignees.task_id == task_id,
@@ -179,8 +217,8 @@ async def assign_task(db: AsyncSession, task_id: int, user_id: int, current_user
     await db.commit()
     return {"message": "Task assigned successfully"}
 
-
 async def get_task_assignees(db: AsyncSession, task_id: int, current_user: User):
+    
     # check task exists in company
     result = await db.execute(
         select(Task).where(Task.id == task_id, Task.company_id == current_user.company_id)
@@ -193,3 +231,29 @@ async def get_task_assignees(db: AsyncSession, task_id: int, current_user: User)
         .where(TaskAssignees.task_id == task_id)
     )
     return result.scalars().all()
+
+
+
+
+
+
+
+# In get_comments — enrich with user name
+async def get_comments(db: AsyncSession, task_id: int, current_user: User):
+    result = await db.execute(
+        select(Comment).where(Comment.task_id == task_id)
+    )
+    comments = result.scalars().all()
+    
+    output = []
+    for c in comments:
+        sender = await db.get(User, c.user_id)
+        output.append({
+            "id": c.id,
+            "task_id": c.task_id,
+            "user_id": c.user_id,
+            "user_name": sender.full_name if sender else "Unknown",
+            "content": c.content,
+            "created_at": c.created_at,
+        })
+    return output

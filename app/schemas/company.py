@@ -1,9 +1,11 @@
 from pydantic import BaseModel, EmailStr
+from typing import Optional
+
+
 
 class CompanyRegister(BaseModel):
     name: str
     email: EmailStr
-    admin_email: EmailStr
     password: str
 
 class CompanyResponse(BaseModel):

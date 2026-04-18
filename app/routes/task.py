@@ -52,7 +52,7 @@ async def update_task_route(
     task_id: int,
     data: TaskUpdate,
     db: Annotated[AsyncSession, Depends(get_db_session)],
-    current_user: Annotated[User, Depends(require_admin_or_lead)]
+    current_user: Annotated[User, Depends(get_current_user)]  # all users can update
 ):
     try:
         return await update_task(db, task_id, data, current_user)

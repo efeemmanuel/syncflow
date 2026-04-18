@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: syncflow-backend
+    runtime: docker
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_HOST
+        fromService:
+          name: syncflow-redis
+          type: redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          name: syncflow-redis
+          type: redis
+          property: port
+      - key: SECRET_KEY
+        sync: false
+
+  - type: redis
+    name: syncflow-redis
+    plan: free
+    maxmemoryPolicy: noeviction

@@ -8,24 +8,21 @@ from app.schemas.team import TeamCreate, TeamUpdate
 
 # CREATE TEAM — admin only
 async def create_team(db: AsyncSession, data: TeamCreate, current_user: User):
-    # check team name doesn't already exist in this company
     result = await db.execute(
         select(Team).where(Team.name == data.name, Team.company_id == current_user.company_id)
     )
     if result.scalar_one_or_none():
         raise ValueError("Team name already exists in this company")
 
-    # check team lead exists and belongs to same company
-    result = await db.execute(
-        select(User).where(User.id == data.team_lead_id, User.company_id == current_user.company_id)
-    )
-    team_lead = result.scalar_one_or_none()
-    if not team_lead:
-        raise ValueError("Team lead not found in this company")
-
-    # check user actually has team lead role
-    if team_lead.role != "team_lead":
-        raise ValueError("User is not a team lead")
+    if data.team_lead_id:
+        result = await db.execute(
+            select(User).where(User.id == data.team_lead_id, User.company_id == current_user.company_id)
+        )
+        team_lead = result.scalar_one_or_none()
+        if not team_lead:
+            raise ValueError("Team lead not found in this company")
+        if team_lead.role != "team_lead":
+            raise ValueError("User is not a team lead")
 
     team = Team(
         name=data.name,
@@ -36,6 +33,9 @@ async def create_team(db: AsyncSession, data: TeamCreate, current_user: User):
     await db.commit()
     await db.refresh(team)
     return team
+
+
+
 
 
 # GET ALL TEAMS — admin sees all, team lead sees only their team

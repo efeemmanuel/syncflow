@@ -28,6 +28,19 @@ from app.core.security import oauth2_scheme
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+# @router.post("/register", response_model=CompanyResponse)
+# async def register(data: CompanyRegister, db: Annotated[AsyncSession, Depends(get_db_session)]):
+#     try:
+#         company = await register_company(db, data)
+#         otp = generate_otp()
+#         await save_otp(company.email, otp)
+#         await send_otp_email(company.email, otp)
+#         await send_admin_invite(db, company.id, data.admin_email)
+#         return company
+#     except ValueError as e:
+#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
 @router.post("/register", response_model=CompanyResponse)
 async def register(data: CompanyRegister, db: Annotated[AsyncSession, Depends(get_db_session)]):
     try:
@@ -35,11 +48,10 @@ async def register(data: CompanyRegister, db: Annotated[AsyncSession, Depends(ge
         otp = generate_otp()
         await save_otp(company.email, otp)
         await send_otp_email(company.email, otp)
-        await send_admin_invite(db, company.id, data.admin_email)
         return company
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    
+
 
 
 
@@ -124,13 +136,21 @@ async def accept_invite(token: str, data: AdminInviteAccept, db: Annotated[Async
 @router.post("/invite-team-lead")
 async def invite_lead(
     email: str,
+    team_id: int,
     db: Annotated[AsyncSession, Depends(get_db_session)],
     current_user: Annotated[User, Depends(require_admin)]
 ):
     try:
-        return await invite_team_lead(db, current_user.company_id, email, current_user)
+        return await invite_team_lead(db, current_user.company_id, email, team_id, current_user)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+
+
+
+
+
 
 
 @router.post("/accept-team-lead-invite")

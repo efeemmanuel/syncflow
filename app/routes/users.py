@@ -11,9 +11,10 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/me", response_model=UserResponse)
 async def get_me_route(
+    db: Annotated[AsyncSession, Depends(get_db_session)],   # ← add db
     current_user: Annotated[User, Depends(get_current_user)]
 ):
-    return await get_me(current_user)
+    return await get_me(current_user, db)   # ← pass db
 
 
 @router.put("/me", response_model=UserResponse)
